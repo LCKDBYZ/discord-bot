@@ -25,7 +25,7 @@ const commands = [
 
     new SlashCommandBuilder()
         .setName("schedule")
-        .setDescription("Megmutatja a mai eseményeket")
+        .setDescription("Megmutatja a következő eseményeket")
 ].map(cmd => cmd.toJSON());
 
 // 2. REST (parancsok feltöltése Discordra)
