@@ -24,6 +24,10 @@ const commands = [
         .setDescription("Válasz: pong"),
 
     new SlashCommandBuilder()
+        .setName("help")
+        .setDescription("Segítség a parancsokról"),
+
+    new SlashCommandBuilder()
         .setName("schedule")
         .setDescription("Megmutatja a következő eseményeket")
 ].map(cmd => cmd.toJSON());
@@ -60,6 +64,12 @@ client.on("interactionCreate", async (interaction) => {
 
     if (interaction.commandName === "ping") {
         await interaction.reply("🏓 Pong!");
+    }
+
+    if (interaction.commandName === "help") {
+        await interaction.reply("Parancsok:\n" +
+            "• `/ping` - Válasz: pong\n" +
+            "• `/schedule` - Megmutatja a következő eseményeket");
     }
 
     if (interaction.commandName === "schedule") {
