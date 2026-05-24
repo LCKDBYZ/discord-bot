@@ -43,6 +43,7 @@ npx ts-node src/index.ts
 
 - `/ping` — replies with `🏓 Pong!`
 - `/schedule` — displays the next 5 upcoming Google Calendar events
+- `/next` — displays the next Google Calendar event
 
 ## Project structure
 

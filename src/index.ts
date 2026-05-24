@@ -29,7 +29,11 @@ const commands = [
 
     new SlashCommandBuilder()
         .setName("schedule")
-        .setDescription("Megmutatja a következő eseményeket")
+        .setDescription("Megmutatja a következő eseményeket"),
+
+    new SlashCommandBuilder()
+        .setName("next")
+        .setDescription("Megmutatja a következő eseményt")
 ].map(cmd => cmd.toJSON());
 
 // 2. REST (parancsok feltöltése Discordra)
@@ -67,40 +71,74 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     if (interaction.commandName === "help") {
-        await interaction.reply("Parancsok:\n" +
-            "• `/ping` - Válasz: pong\n" +
-            "• `/schedule` - Megmutatja a következő eseményeket");
+        const helpText = commands
+            .map(cmd => `• \`/${cmd.name}\` – ${cmd.description}`)
+            .join("\n");
+        await interaction.reply(`**Parancsok:**\n${helpText}`);
     }
 
     if (interaction.commandName === "schedule") {
         await interaction.deferReply();
 
-        const events = await getEvents();
+        try {
+            const events = await getEvents();
 
-        const nextFive = events.slice(0, 5);
+            if (!events || events.length === 0) {
+                await interaction.editReply("📅 Nincs közelgő eseményed 👍");
+                return;
+            }
+            const nextFive = events.slice(0, 5);
 
-        if (!events || events.length === 0) {
-            await interaction.editReply("📅 Nincs közelgő eseményed 👍");
+            const text = nextFive
+                .map(e => {
+                    const time = e.start?.dateTime
+                        ? new Date(e.start.dateTime).toLocaleString("hu-HU", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        })
+                        : "egész nap";
+
+                    return `📌 ${time} - ${e.summary}`;
+                })
+                .join("\n");
+
+            await interaction.editReply(text);
+        } catch (error) {
+            console.error("Hiba az események lekérésekor:", error);
+            await interaction.editReply("❌ Hiba történt az események lekérésekor.");
+        }
+    }
+
+    if (interaction.commandName === "next") {
+        await interaction.deferReply();
+
+        try {
+            const events = await getEvents();
+            if (!events || events.length === 0) {
+                await interaction.editReply("📅 Nincs közelgő eseményed 👍");
+                return;
+            }
+            const event = events[0];
+
+            const time = event.start?.dateTime
+                ? new Date(event.start.dateTime).toLocaleString("hu-HU", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })
+                : "egész nap";
+
+            await interaction.editReply(`📌 ${time} - ${event.summary}`);
+        } catch (error) {
+            console.error("Hiba az események lekérésekor:", error);
+            await interaction.editReply("❌ Hiba történt az események lekérésekor.");
             return;
         }
-
-        const text = nextFive
-            .map(e => {
-                const time = e.start?.dateTime
-                    ? new Date(e.start.dateTime).toLocaleTimeString("hu-HU", {
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    })
-                    : "egész nap";
-
-                return `📌 ${time} - ${e.summary}`;
-            })
-            .join("\n");
-
-        await interaction.editReply(text);
     }
+
 });
 
 // 5. Login
