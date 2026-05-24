@@ -4,7 +4,7 @@ import {
     REST,
     Routes,
     SlashCommandBuilder,
-    EmbedBuilder          // ← ezt add hozzá az importhoz
+    EmbedBuilder
 } from "discord.js";
 
 import { getEvents } from "./calendar";
